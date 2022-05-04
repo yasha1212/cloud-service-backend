@@ -12,4 +12,9 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CloudService.Configurations\CloudService.Configurations.csproj" />
+    <ProjectReference Include="..\CloudService.DAL\CloudService.DAL.csproj" />
+  </ItemGroup>
+
 </Project>

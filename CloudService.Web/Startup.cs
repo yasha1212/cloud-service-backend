@@ -1,3 +1,5 @@
+using CloudService.Configurations;
+using CloudService.DAL.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -18,8 +20,13 @@ namespace CloudService.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDataAccess(options =>
+            {
+                options.ConnectionString = Configuration.GetConnectionString(ConfigurationKeys.ConnectionStringName);
+            });
 
             services.AddControllers();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "CloudService.Web", Version = "v1" });
