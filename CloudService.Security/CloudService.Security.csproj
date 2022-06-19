@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.19.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CloudService.Configurations\CloudService.Configurations.csproj" />
+    <ProjectReference Include="..\CloudService.Entities\CloudService.Entities.csproj" />
+    <ProjectReference Include="..\CloudService.Impl\CloudService.Impl.csproj" />
+  </ItemGroup>
+
+</Project>

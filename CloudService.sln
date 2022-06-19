@@ -5,11 +5,15 @@ VisualStudioVersion = 16.0.31515.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudService.Web", "CloudService.Web\CloudService.Web.csproj", "{45E04B45-224D-495E-8A6E-F13744E4FE7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudService.DAL", "CloudService.DAL\CloudService.DAL.csproj", "{E334E903-C302-4CAD-AA05-0B3951FBA0AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudService.DAL", "CloudService.DAL\CloudService.DAL.csproj", "{E334E903-C302-4CAD-AA05-0B3951FBA0AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudService.Entities", "CloudService.Entities\CloudService.Entities.csproj", "{1FD3FA0E-B4E8-4AD2-BBCD-785F196C6D72}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudService.Entities", "CloudService.Entities\CloudService.Entities.csproj", "{1FD3FA0E-B4E8-4AD2-BBCD-785F196C6D72}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudService.Configurations", "CloudService.Configurations\CloudService.Configurations.csproj", "{81C3BFFB-3D1C-408F-9F48-8DC2A14B8565}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudService.Configurations", "CloudService.Configurations\CloudService.Configurations.csproj", "{81C3BFFB-3D1C-408F-9F48-8DC2A14B8565}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudService.Security", "CloudService.Security\CloudService.Security.csproj", "{C0A713B8-F278-4C0C-9C38-514232F9888E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudService.Impl", "CloudService.Impl\CloudService.Impl.csproj", "{4D0CFA36-67AE-45A0-BF26-14A2D07EA024}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{81C3BFFB-3D1C-408F-9F48-8DC2A14B8565}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81C3BFFB-3D1C-408F-9F48-8DC2A14B8565}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81C3BFFB-3D1C-408F-9F48-8DC2A14B8565}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0A713B8-F278-4C0C-9C38-514232F9888E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0A713B8-F278-4C0C-9C38-514232F9888E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0A713B8-F278-4C0C-9C38-514232F9888E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0A713B8-F278-4C0C-9C38-514232F9888E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D0CFA36-67AE-45A0-BF26-14A2D07EA024}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D0CFA36-67AE-45A0-BF26-14A2D07EA024}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D0CFA36-67AE-45A0-BF26-14A2D07EA024}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D0CFA36-67AE-45A0-BF26-14A2D07EA024}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

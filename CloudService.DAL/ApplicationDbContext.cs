@@ -17,6 +17,8 @@ namespace CloudService.DAL
 
 		public DbSet<SharingRule> SharingRules { get; set; }
 
+		public DbSet<RefreshToken> RefreshTokens { get; set; }
+
 
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
 		{
