@@ -16,6 +16,8 @@ namespace CloudService.Impl.Services.Folders
 
         Task<FolderInfo> Get(string id);
 
+        Task<FolderInfo> GetRoot(string storageId);
+
         Task<IEnumerable<FolderInfo>> GetAll(string parentId);
 
         Task Delete(string id);

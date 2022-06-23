@@ -1,5 +1,6 @@
 ﻿using CloudService.Impl.Services.Files;
 using CloudService.Impl.Services.Folders;
+using CloudService.Impl.Services.FrameService;
 using CloudService.Impl.Services.Sharing;
 using CloudService.Impl.Services.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,7 @@ namespace CloudService.Impl
             services.AddScoped<IFoldersService, FoldersService>();
             services.AddScoped<ISharingService, SharingService>();
             services.AddScoped<IFilesService, FilesService>();
+            services.AddScoped<IFrameService, FrameService>();
 
             return services;
         }

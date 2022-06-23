@@ -78,7 +78,17 @@ namespace CloudService.Web.Controllers
 				return StatusCode(StatusCodes.Status500InternalServerError, CreateError("User creation failed! Please check user details and try again."));
 			}
 
-			return Ok();
+			var token = await authService.Login(model.Email, model.Password);
+
+			var refreshTokenInfo = refreshTokenService.Find(token.RefreshToken);
+
+			Response.Cookies.Append("refreshToken", token.RefreshToken, CreateRefreshTokenCookieOptions(refreshTokenInfo));
+
+			return Ok(new TokenViewModel
+			{
+				Token = token.Token,
+				Expiration = token.Expiration
+			});
 		}
 
 		[HttpPost]

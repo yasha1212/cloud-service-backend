@@ -1,10 +1,10 @@
 ﻿using CloudService.Entities;
+using CloudService.Impl.Services.FrameService;
 using CloudService.Impl.Services.Storage;
-using CloudService.Web.ViewModels.Storage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CloudService.Web.Controllers
@@ -14,15 +14,18 @@ namespace CloudService.Web.Controllers
     public class StorageController : ApiController
     {
         private readonly IStorageService storageService;
+        private readonly IFrameService frameService;
         private readonly UserManager<ApplicationUser> userManager;
 
         public StorageController(
             IStorageService storageService,
-            UserManager<ApplicationUser> userManager
+            UserManager<ApplicationUser> userManager,
+            IFrameService frameService
         )
         {
             this.storageService = storageService;
             this.userManager = userManager;
+            this.frameService = frameService;
         }
 
         [HttpPost]
@@ -31,9 +34,9 @@ namespace CloudService.Web.Controllers
         {
             var user = await userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            var result = await storageService.Create(name, user.Id);
+            await storageService.Create(name, user.Id);
 
-            return Ok(ToViewModel(result));
+            return Ok(await frameService.GetFrame(null, user.UserName));
         }
 
         [HttpPut]
@@ -42,69 +45,30 @@ namespace CloudService.Web.Controllers
         {
             var user = await userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            var result = await storageService.Update(name, user.Id);
+            await storageService.Update(name, user.Id);
 
-            return Ok(ToViewModel(result));
+            return Ok(await frameService.GetFrame(null, user.UserName));
+        }
+
+        [HttpGet]
+        [Route("{folderId}")]
+        public async Task<IActionResult> Get(string folderId)
+        {
+            return Ok(await frameService.GetFrame(folderId, HttpContext.User.Identity.Name));
         }
 
         [HttpGet]
         [Route("")]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetRoot()
         {
-            var user = await userManager.FindByNameAsync(HttpContext.User.Identity.Name);
-
-            var result = await storageService.Get(user.Id);
-
-            return Ok(ToViewModel(result));
+            return Ok(await frameService.GetFrame(null, HttpContext.User.Identity.Name));
         }
 
-        private StorageViewModel ToViewModel(Storage model)
+        [HttpGet]
+        [Route("links")]
+        public async Task<IActionResult> GetLinks()
         {
-            var capacity = CalculateCapacity(model.Capacity);
-            var usedCapacity = CalculateCapacity(model.UsedCapacity);
-
-            var result = new StorageViewModel
-            {
-                Id = model.Id,
-                Name = model.Name,
-                Capacity = capacity.Item1,
-                CapacityType = capacity.Item2,
-                UsedCapacity = usedCapacity.Item1,
-                UsedCapacityType = usedCapacity.Item2
-            };
-
-            return result;
-        }
-
-        private (double, string) CalculateCapacity(long bytes)
-        {
-            var counter = 0;
-            double value = Convert.ToDouble(bytes);
-
-            while(value >= 1000)
-            {
-                value /= 1000;
-                counter++;
-            }
-
-            value = Math.Round(value, 1);
-
-            string type = "";
-
-            switch(counter)
-            {
-                case 0:
-                    type = "Б";
-                    break;
-                case 1:
-                    type = "КБ";
-                    break;
-                case 2:
-                    type = "МБ";
-                    break;
-            }
-
-            return (value, type);
+            return Ok(await frameService.GetLinksFrame(HttpContext.User.Identity.Name));
         }
     }
 }

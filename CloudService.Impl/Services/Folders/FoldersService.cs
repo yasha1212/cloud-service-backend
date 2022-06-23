@@ -81,6 +81,15 @@ namespace CloudService.Impl.Services.Folders
             return model;
         }
 
+        public async Task<FolderInfo> GetRoot(string storageId)
+        {
+            var model = await DbContext.FolderInfos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.StorageId == storageId && e.Name == "root");
+
+            return model;
+        }
+
         public async Task<IEnumerable<FolderInfo>> GetAll(string parentId)
         {
             var folders = await DbContext.FolderInfos
@@ -127,6 +136,17 @@ namespace CloudService.Impl.Services.Folders
             if (model.Folder != null)
             {
                 await UpdateParentSize(model.FolderId, bytes);
+            }
+            else
+            {
+                var storage = await DbContext.Storages
+                    .FirstOrDefaultAsync(e => e.Id == model.StorageId);
+
+                storage.UsedCapacity += bytes;
+
+                DbContext.Storages.Update(storage);
+
+                await DbContext.SaveChangesAsync();
             }
         }
 
@@ -205,6 +225,8 @@ namespace CloudService.Impl.Services.Folders
                 DbContext.FileInfos.Remove(file);
 
                 await DbContext.SaveChangesAsync();
+
+                await UpdateSize(file.FolderId, -file.Size);
             }
         }
 
