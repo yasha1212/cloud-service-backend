@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CloudService.Entities
@@ -24,5 +25,15 @@ namespace CloudService.Entities
 
         [ForeignKey("FolderId")]
         public FolderInfo Folder { get; set; }
+
+        public List<FolderInfo> ChildFolders { get; set; }
+
+        public List<FileInfo> ChildFiles { get; set; }
+
+        public FolderInfo()
+        {
+            ChildFiles = new List<FileInfo>();
+            ChildFolders = new List<FolderInfo>();
+        }
     }
 }

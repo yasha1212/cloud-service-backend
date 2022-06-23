@@ -1,5 +1,5 @@
 ﻿using CloudService.DAL;
-using CloudService.Impl;
+using CloudService.Impl.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;

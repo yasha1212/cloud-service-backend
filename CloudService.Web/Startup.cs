@@ -2,6 +2,7 @@ using CloudService.Configurations;
 using CloudService.DAL;
 using CloudService.DAL.Extensions;
 using CloudService.Entities;
+using CloudService.Impl;
 using CloudService.Security;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -35,6 +36,8 @@ namespace CloudService.Web
             services.AddConfiguration(Configuration);
 
             services.AddSecurity();
+
+            services.AddImpl();
 
             services.AddControllers();
 

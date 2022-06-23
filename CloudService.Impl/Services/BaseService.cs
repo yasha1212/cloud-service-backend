@@ -1,6 +1,6 @@
 ﻿using CloudService.DAL;
 
-namespace CloudService.Impl
+namespace CloudService.Impl.Services
 {
     public abstract class BaseService
     {
