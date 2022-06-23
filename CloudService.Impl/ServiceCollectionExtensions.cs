@@ -1,5 +1,4 @@
-﻿using CloudService.Impl.Services.Extensions;
-using CloudService.Impl.Services.Files;
+﻿using CloudService.Impl.Services.Files;
 using CloudService.Impl.Services.Folders;
 using CloudService.Impl.Services.Sharing;
 using CloudService.Impl.Services.Storage;
@@ -13,7 +12,6 @@ namespace CloudService.Impl
         {
             services.AddScoped<IStorageService, StorageService>();
             services.AddScoped<IFoldersService, FoldersService>();
-            services.AddScoped<IExtensionsService, ExtensionsService>();
             services.AddScoped<ISharingService, SharingService>();
             services.AddScoped<IFilesService, FilesService>();
 

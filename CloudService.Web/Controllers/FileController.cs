@@ -1,4 +1,5 @@
 ﻿using CloudService.Entities;
+using CloudService.Impl.Services.Files;
 using CloudService.Impl.Services.Folders;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,17 +9,20 @@ using System.Threading.Tasks;
 namespace CloudService.Web.Controllers
 {
     [Authorize]
-    [Route("folder")]
-    public class FoldersController : ApiController
+    [Route("file")]
+    public class FileController : ApiController
     {
+        private readonly IFilesService filesService;
         private readonly IFoldersService foldersService;
         private readonly UserManager<ApplicationUser> userManager;
 
-        public FoldersController(
+        public FileController(
+            IFilesService filesService,
             IFoldersService foldersService,
             UserManager<ApplicationUser> userManager
         )
         {
+            this.filesService = filesService;
             this.foldersService = foldersService;
             this.userManager = userManager;
         }
@@ -27,9 +31,9 @@ namespace CloudService.Web.Controllers
         [Route("")]
         public async Task<IActionResult> Create(string name, string parentId)
         {
-            if (await IsCorrectAction(parentId))
+            if (await IsCorrectAction(null, parentId))
             {
-                await foldersService.Create(name, parentId);
+                await filesService.Create(name, parentId);
 
                 return Ok();
             }
@@ -41,9 +45,9 @@ namespace CloudService.Web.Controllers
         [Route("")]
         public async Task<IActionResult> Delete(string id)
         {
-            if (await IsCorrectAction(id))
+            if (await IsCorrectAction(id, null))
             {
-                await foldersService.Delete(id);
+                await filesService.Delete(id);
 
                 return Ok();
             }
@@ -55,9 +59,9 @@ namespace CloudService.Web.Controllers
         [Route("")]
         public async Task<IActionResult> Update(string id, string name)
         {
-            if (await IsCorrectAction(id))
+            if (await IsCorrectAction(id, null))
             {
-                await foldersService.Update(id, name);
+                await filesService.Update(id, name);
 
                 return Ok();
             }
@@ -65,13 +69,22 @@ namespace CloudService.Web.Controllers
             return Unauthorized();
         }
 
-        private async Task<bool> IsCorrectAction(string id)
+        private async Task<bool> IsCorrectAction(string id, string parentId)
         {
             var user = await userManager.FindByNameAsync(HttpContext.User.Identity.Name);
 
-            var folder = await foldersService.Get(id);
+            if (parentId != null)
+            {
+                var folder = await foldersService.Get(parentId);
 
-            return user.Id == folder.Storage.UserId ? true : false;
+                return user.Id == folder.Storage.UserId ? true : false;
+            }
+            else
+            {
+                var file = await filesService.Get(id);
+
+                return user.Id == file.Storage.UserId ? true : false;
+            }
         }
     }
 }
