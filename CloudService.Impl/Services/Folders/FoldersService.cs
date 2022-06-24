@@ -1,8 +1,11 @@
-﻿using CloudService.DAL;
+﻿using CloudService.Configurations;
+using CloudService.DAL;
 using CloudService.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,16 +13,25 @@ namespace CloudService.Impl.Services.Folders
 {
     public class FoldersService : BaseService, IFoldersService
     {
-        public FoldersService(ApplicationDbContext dbContext)
+        private readonly PortalConfiguration configuration;
+
+        public FoldersService(
+            ApplicationDbContext dbContext,
+            IOptions<PortalConfiguration> options
+            )
             : base(dbContext)
         {
+            configuration = options.Value;
         }
-
-        // ADD SAVING_SERVICE
 
         public async Task Create(string name, string parentId)
         {
             var parent = await Get(parentId);
+
+            var srvPath = configuration.Uploading.FileServerPath;
+            var fullPath = Path.Combine(srvPath, $"{parent.Path}\\{name}");
+
+            Directory.CreateDirectory(fullPath);
 
             var model = new FolderInfo
             {
@@ -40,6 +52,11 @@ namespace CloudService.Impl.Services.Folders
 
         public async Task CreateRoot(string storageId)
         {
+            var srvPath = configuration.Uploading.FileServerPath;
+            var fullPath = Path.Combine(srvPath, $"{storageId}\\root");
+
+            Directory.CreateDirectory(fullPath);
+
             var model = new FolderInfo
             {
                 Id = Guid.NewGuid().ToString(),
@@ -62,6 +79,11 @@ namespace CloudService.Impl.Services.Folders
                 .Include(e => e.ChildFiles)
                 .Include(e => e.ChildFolders)
                 .FirstOrDefaultAsync(e => e.Id == id);
+
+            var srvPath = configuration.Uploading.FileServerPath;
+            var fullPath = Path.Combine(srvPath, $"{model.Path}");
+
+            Directory.Delete(fullPath, true);
 
             await DeleteChildFolders(model);
             await DeleteChildFiles(model);
@@ -107,6 +129,11 @@ namespace CloudService.Impl.Services.Folders
                 .Include(e => e.ChildFolders)
                 .Include(e => e.ChildFiles)
                 .FirstOrDefaultAsync(e => e.Id == id);
+
+            var srvPath = configuration.Uploading.FileServerPath;
+            var fullPath = Path.Combine(srvPath, $"{model.Path}");
+
+            Directory.Move(fullPath, Path.Combine(srvPath, $"{model.Folder.Path}\\{name}"));
 
             model.Name = name;
             model.Path = $"{model.Folder.Path}\\{name}";

@@ -1,4 +1,5 @@
 ﻿using CloudService.Entities;
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -6,7 +7,7 @@ namespace CloudService.Impl.Services.Files
 {
     public interface IFilesService
     {
-        Task Create(string name, string parentId);
+        Task Create(string parentId, IFormFile file);
 
         Task Update(string id, string name);
 

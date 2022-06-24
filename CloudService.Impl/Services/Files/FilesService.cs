@@ -1,10 +1,15 @@
-﻿using CloudService.DAL;
+﻿using CloudService.Configurations;
+using CloudService.DAL;
 using CloudService.Entities;
 using CloudService.Impl.Services.Folders;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace CloudService.Impl.Services.Files
@@ -12,34 +17,52 @@ namespace CloudService.Impl.Services.Files
     public class FilesService : BaseService, IFilesService
     {
         private readonly IFoldersService foldersService;
+        private readonly PortalConfiguration configuration;
 
         public FilesService(
             ApplicationDbContext dbContext,
-            IFoldersService foldersService
+            IFoldersService foldersService,
+            IOptions<PortalConfiguration> options
             ) 
             : base(dbContext)
         {
             this.foldersService = foldersService;
+            configuration = options.Value;
         }
 
-        // ADD SAVING_SERVICE
-
-        public async Task Create(string name, string parentId)
+        public async Task Create(string parentId, IFormFile file)
         {
             var parent = await foldersService.Get(parentId);
 
-            var model = new FileInfo
+            var pathToSave = Path.Combine(configuration.Uploading.FileServerPath, parent.Path);
+
+            var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
+
+            var fullPath = Path.Combine(pathToSave, fileName);
+
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                file.CopyTo(stream);
+            }
+
+            var nameAndExtension = GetNameAndExtension(fileName);
+
+            var extension = await DbContext.Extensions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Format == nameAndExtension.Extension);
+
+            var model = new Entities.FileInfo
             {
                 Id = Guid.NewGuid().ToString(),
                 CreatedOn = DateTime.Now,
                 LastModifiedOn = DateTime.Now,
-                ExtensionId = "7a7b36d3-533d-44c4-9cb8-71db38ab5c8b", //CHANGE
+                ExtensionId = extension.Id,
                 FolderId = parentId,
                 IsProtected = true,
-                Name = name,
-                Size = 1200, //CHANGE
+                Name = nameAndExtension.Name,
+                Size = file.Length,
                 StorageId = parent.StorageId,
-                Path = $"{parent.Path}\\{name}.docx"
+                Path = $"{parent.Path}\\{nameAndExtension.Name}{extension.Format}"
             };
 
             DbContext.FileInfos.Add(model);
@@ -54,6 +77,11 @@ namespace CloudService.Impl.Services.Files
             var model = await DbContext.FileInfos
                 .FirstOrDefaultAsync(e => e.Id == id);
 
+            var srvPath = configuration.Uploading.FileServerPath;
+            var fullPath = Path.Combine(srvPath, $"{model.Path}");
+
+            File.Delete(fullPath);
+
             DbContext.FileInfos.Remove(model);
 
             await DbContext.SaveChangesAsync();
@@ -61,7 +89,7 @@ namespace CloudService.Impl.Services.Files
             await foldersService.UpdateSize(model.FolderId, -model.Size);
         }
 
-        public async Task<FileInfo> Get(string id)
+        public async Task<Entities.FileInfo> Get(string id)
         {
             var model = await DbContext.FileInfos
                 .AsNoTracking()
@@ -72,7 +100,7 @@ namespace CloudService.Impl.Services.Files
             return model;
         }
 
-        public async Task<IEnumerable<FileInfo>> GetAll(string parentId)
+        public async Task<IEnumerable<Entities.FileInfo>> GetAll(string parentId)
         {
             var files = await DbContext.FileInfos
                 .Include(e => e.Extension)
@@ -83,7 +111,7 @@ namespace CloudService.Impl.Services.Files
             return files;
         }
 
-        public async Task<IEnumerable<FileInfo>> GetAllPublished(string storageId)
+        public async Task<IEnumerable<Entities.FileInfo>> GetAllPublished(string storageId)
         {
             var files = await DbContext.FileInfos
                 .Include(e => e.Extension)
@@ -101,6 +129,11 @@ namespace CloudService.Impl.Services.Files
                 .Include(e => e.Extension)
                 .FirstOrDefaultAsync(e => e.Id == id);
 
+            var srvPath = configuration.Uploading.FileServerPath;
+            var fullPath = Path.Combine(srvPath, $"{model.Path}");
+
+            File.Move(fullPath, Path.Combine(srvPath, $"{model.Folder.Path}\\{name}{model.Extension.Format}"));
+
             model.Name = name;
             model.Path = $"{model.Folder.Path}\\{name}{model.Extension.Format}";
             model.LastModifiedOn = DateTime.Now;
@@ -108,6 +141,16 @@ namespace CloudService.Impl.Services.Files
             DbContext.FileInfos.Update(model);
 
             await DbContext.SaveChangesAsync();
+        }
+
+        private (string Name, string Extension) GetNameAndExtension(string fullName)
+        {
+            var extensionStartIndex = fullName.LastIndexOf('.');
+
+            var extension = fullName.Substring(extensionStartIndex);
+            var name = fullName.Substring(0, extensionStartIndex);
+
+            return (Name: name, Extension: extension);
         }
     }
 }

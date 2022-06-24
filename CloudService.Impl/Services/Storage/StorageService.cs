@@ -21,7 +21,6 @@ namespace CloudService.Impl.Services.Storage
             this.foldersService = foldersService;
         }
 
-        // ADD SAVING_SERVICE
         public async Task<Entities.Storage> Create(string name, string userId)
         {
             var model = new Entities.Storage

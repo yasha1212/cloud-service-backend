@@ -5,6 +5,10 @@ using CloudService.Impl.Services.FrameService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.IO;
+using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace CloudService.Web.Controllers
@@ -29,20 +33,6 @@ namespace CloudService.Web.Controllers
             this.foldersService = foldersService;
             this.userManager = userManager;
             this.frameService = frameService;
-        }
-
-        [HttpPost]
-        [Route("{parentId}")]
-        public async Task<IActionResult> Create(string name, string parentId)
-        {
-            if (await IsCorrectAction(null, parentId))
-            {
-                await filesService.Create(name, parentId);
-
-                return Ok(await frameService.GetFrame(parentId, HttpContext.User.Identity.Name));
-            }
-
-            return Unauthorized();
         }
 
         [HttpDelete]
@@ -72,6 +62,37 @@ namespace CloudService.Web.Controllers
                 await filesService.Update(id, name);
 
                 return Ok(await frameService.GetFrame(parentId, HttpContext.User.Identity.Name));
+            }
+
+            return Unauthorized();
+        }
+
+        [HttpPost, DisableRequestSizeLimit]
+        [Route("upload/{parentId}")]
+        public async Task<IActionResult> Upload(string parentId)
+        {
+            if (await IsCorrectAction(null, parentId))
+            {
+                try
+                {
+                    var formCollection = await Request.ReadFormAsync();
+                    var file = formCollection.Files.First();
+
+                    if (file.Length > 0)
+                    {
+                        await filesService.Create(parentId, file);
+
+                        return Ok(await frameService.GetFrame(parentId, HttpContext.User.Identity.Name));
+                    }
+                    else
+                    {
+                        return BadRequest();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Internal server error: {ex}");
+                }
             }
 
             return Unauthorized();
