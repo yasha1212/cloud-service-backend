@@ -98,6 +98,15 @@ namespace CloudService.Web.Controllers
             return Unauthorized();
         }
 
+        [HttpGet, DisableRequestSizeLimit]
+        [Route("download/{id}")]
+        public async Task<IActionResult> Download(string id)
+        {
+            var result = await filesService.GetForDownload(id);
+
+            return File(result.File, result.MimeType, result.Name);
+        }
+
         private async Task<bool> IsCorrectAction(string id, string parentId)
         {
             var user = await userManager.FindByNameAsync(HttpContext.User.Identity.Name);

@@ -3,6 +3,7 @@ using CloudService.DAL;
 using CloudService.Entities;
 using CloudService.Impl.Services.Folders;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System;
@@ -98,6 +99,31 @@ namespace CloudService.Impl.Services.Files
                 .FirstOrDefaultAsync(e => e.Id == id);
 
             return model;
+        }
+
+        public async Task<(MemoryStream File, string MimeType, string Name)> GetForDownload(string id)
+        {
+            var model = await Get(id);
+            var memory = new MemoryStream();
+            var fullPath = Path.Combine(configuration.Uploading.FileServerPath, model.Path);
+
+            await using (var stream = new FileStream(fullPath, FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+
+            memory.Position = 0;
+
+            var provider = new FileExtensionContentTypeProvider();
+
+            string contentType;
+
+            if (!provider.TryGetContentType(fullPath, out contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            return (memory, contentType, $"{model.Name}{model.Extension.Format}");
         }
 
         public async Task<IEnumerable<Entities.FileInfo>> GetAll(string parentId)
